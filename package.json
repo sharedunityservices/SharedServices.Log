@@ -1,0 +1,15 @@
+{
+  "name": "com.sharedunityservices.template",
+  "displayName": "SharedServices.Template",
+  "version": "1.0.0",
+  "description": "<b>Dependencies:</b> https://github.com/sharedunityservices/SharedServices..Core.git\n\n<b>SharedServices.Template</b> is a template package for SharedServices. It is a starting point for creating new packages.",
+  "unity": "2020.1",
+  "author": {
+    "name": "ETdoFresh",
+    "email": "etdofresh@gmail.com",
+    "url": "https://github.com/sharedunityservices"
+  },
+  "dependencies": {
+    "com.sharedunityservices.core": "1.0.0"
+  }
+}
