@@ -1,5 +1,6 @@
 using System;
 using SharedServices.Files.V1;
+using SharedServices.Locator.V1;
 
 namespace SharedServices.Log
 {
@@ -20,6 +21,7 @@ namespace SharedServices.Log
 
             try
             {
+                _fileService ??= ServiceLocator.Get<IFileService>();
                 var config = _fileService.ReadJson<Config>("config.json");
                 if (config == null) return;
                 if (config.LogLevel.HasValue) _logLevel = config.LogLevel.Value;
