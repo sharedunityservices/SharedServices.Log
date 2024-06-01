@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SharedServices.Template
+namespace SharedServices.Log
 {
     public class NewBehaviourScript : MonoBehaviour
     {

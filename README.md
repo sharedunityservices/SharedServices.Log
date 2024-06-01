@@ -1,2 +1,2 @@
-# SharedServices.Template
-A template repository for shared services
+# SharedServices.Log
+This package provides a simple logging service for use in other packages.
