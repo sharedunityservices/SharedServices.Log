@@ -4,6 +4,7 @@ using SharedServices.Locator.V1;
 
 namespace SharedServices.Log
 {
+    [UnityEngine.Scripting.Preserve]
     public class Log : ILog
     {
         private static LogLevel _logLevel = LogLevel.Debug;
