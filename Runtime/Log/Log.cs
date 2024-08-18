@@ -29,40 +29,71 @@ namespace SharedServices.Log
                 if (config.LogTime.HasValue) LogTime = config.LogTime.Value;
                 if (config.LogToUnityConsole.HasValue) LogToUnityConsole = config.LogToUnityConsole.Value;
                 if (config.LogToSystemConsole.HasValue) LogToSystemConsole = config.LogToSystemConsole.Value;
+                ILog.Trace("Log settings loaded from config.json.\n" +
+                           $"LogLevel: {_logLevel}\n" +
+                           $"LogToFile: {LogToFile}\n" +
+                           $"LogTime: {LogTime}\n" +
+                           $"LogToUnityConsole: {LogToUnityConsole}\n" +
+                           $"LogToSystemConsole: {LogToSystemConsole}", this);
             }
             catch
             {
                 // ignored
+                ILog.Warn("Failed to read config.json, using default log settings.", this);
             }
         }
 
-        public void LogMessage(LogLevel logLevel, string message, UnityEngine.Object context = null)
+        public void LogMessage(LogLevel logLevel, string message, object context = null)
         {
             if (logLevel > _logLevel) return;
-            var logMessage = LogTime
-                ? $"[{DateTime.Now:yyyyMMddTHHmmssfff}] {logLevel}: {message}"
-                : $"{logLevel}: {message}";
-            if (LogToFile) _fileService.WriteAllText(LogFilePath, logMessage + System.Environment.NewLine);
-            if (LogToUnityConsole) LogUnityMessage(logLevel, message, context);
-            if (LogToSystemConsole) Console.WriteLine(logMessage);
+            var fileLogMessage = $"{logLevel}: {message}";
+            var unityLogMessage = $"{message}";
+            if (context != null)
+            {
+                if (LogTime)
+                {
+                    fileLogMessage = $"[{DateTime.Now:yyyyMMddTHHmmssfff}] {fileLogMessage}";
+                }
+                if (context is Type type)
+                {
+                    fileLogMessage = $"[{type.Name}] {fileLogMessage}";
+                    unityLogMessage = $"[{type.Name}] {unityLogMessage}";
+                }
+#if UNITY_EDITOR
+                else if (context is UnityEditor.MonoScript monoScript)
+                {
+                    fileLogMessage = $"[{monoScript.name}] {fileLogMessage}";
+                    unityLogMessage = $"[{monoScript.name}] {unityLogMessage}";
+                }
+#endif
+                else
+                {
+                    fileLogMessage = $"[{context.GetType().Name}] {fileLogMessage}";
+                    unityLogMessage = $"[{context.GetType().Name}] {unityLogMessage}";
+                }
+            }
+
+            if (LogToFile) _fileService.WriteAllText(LogFilePath, fileLogMessage + System.Environment.NewLine);
+            if (LogToUnityConsole) LogUnityMessage(logLevel, unityLogMessage, context);
+            if (LogToSystemConsole) Console.WriteLine(fileLogMessage);
         }
 
-        private void LogUnityMessage(LogLevel logLevel, string message, UnityEngine.Object context)
+        private void LogUnityMessage(LogLevel logLevel, string message, object context)
         {
             switch (logLevel)
             {
                 case LogLevel.Fatal:
                 case LogLevel.Error:
-                    UnityEngine.Debug.LogError(message, context);
+                    UnityEngine.Debug.LogError(message, context as UnityEngine.Object);
                     break;
                 case LogLevel.Warn:
-                    UnityEngine.Debug.LogWarning(message, context);
+                    UnityEngine.Debug.LogWarning(message, context as UnityEngine.Object);
                     break;
                 case LogLevel.Info:
                 case LogLevel.Debug:
                 case LogLevel.Trace:
                 default:
-                    UnityEngine.Debug.Log(message, context);
+                    UnityEngine.Debug.Log(message, context as UnityEngine.Object);
                     break;
             }
         }
