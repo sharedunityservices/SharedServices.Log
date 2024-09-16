@@ -79,11 +79,42 @@ namespace SharedServices.Log
             if (LogToSystemConsole) Console.WriteLine(fileLogMessage);
         }
 
+        public void LogException(Exception exception, object context = null)
+        {
+            var fileLogMessage = $"Exception: {exception.Message}\n{exception.StackTrace}";
+            if (context != null)
+            {
+                if (LogTime)
+                {
+                    fileLogMessage = $"[{DateTime.Now:yyyyMMddTHHmmssfff}] {fileLogMessage}";
+                }
+
+                if (context is Type type)
+                {
+                    fileLogMessage = $"[{type.Name}] {fileLogMessage}";
+                }
+#if UNITY_EDITOR
+                else if (context is UnityEditor.MonoScript monoScript)
+                {
+                    fileLogMessage = $"[{monoScript.name}] {fileLogMessage}";
+                }
+#endif
+                else
+                {
+                    fileLogMessage = $"[{context.GetType().Name}] {fileLogMessage}";
+                }
+            }
+            
+            if (LogToFile) _fileService.WriteAllText(LogFilePath, fileLogMessage + System.Environment.NewLine);
+            if (LogToUnityConsole) UnityEngine.Debug.LogException(exception, context as UnityEngine.Object);
+            if (LogToSystemConsole) Console.WriteLine(fileLogMessage);
+        }
+
         private void LogUnityMessage(LogLevel logLevel, string message, object context)
         {
             switch (logLevel)
             {
-                case LogLevel.Fatal:
+                case LogLevel.Exception:
                 case LogLevel.Error:
                     UnityEngine.Debug.LogError(message, context as UnityEngine.Object);
                     break;

@@ -2,7 +2,7 @@ namespace SharedServices.Log
 {
     public enum LogLevel
     {
-        Fatal,
+        Exception,
         Error,
         Warn,
         Info,
